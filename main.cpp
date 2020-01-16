@@ -1,100 +1,49 @@
 #include <iostream>
 #include <cstdlib>
+#include <string>
 #include "SubstChiffre.hpp"
 
 using namespace std;
 using namespace CRYPTO;
 
-void demoVigenere();
-void demoCaesar();
-void demoSubChiffre();
-
 int main()
 {
     srand(time(NULL));
-    //demoVigenere();
-    //demoCaesar();
-    demoSubChiffre();
-}
-
-void demoSubChiffre(){
+    CryptoSystemFactory f;
+    ICryptoSys *s;
     string c, m, mm;
+    bool newProc, quit;
     try{
-        SubChiffre *s = new SubChiffre();
-        s->initAlphabet("abcdefghijklmnopqrstuvwxyz_");
-        cout << "Use the following alphabet:\n"<< s->getAlphabet() << endl << endl;
+    	while(1){
+    		newProc = false;
+    		s = f.getCryptoSystem();
+    		cout << "PROC: " << s->name() << endl;
+			s->initAlphabet("abcdefghijklmnopqrstuvwxyz_");
+			cout << "USE THE FOLLOWING ALPHABET:\n'"<< s->getAlphabet() << "'" << endl << endl;
 
-        s->generateRandomKey();
-        cout << s->getKey() << endl;
-
-        while(1){
-            cout << "input message: ";
-            cin >> m;
-            c  = s->encrypt(m);
-            mm = s->decrypt(c);
-            cout << "m : '" << m << "'\nc : '" << c << "'\nmm: '" << mm <<"'\n";
-        }
-    }catch(string msg){
+    		while(1){
+    			s->generateRandomKey();
+    			cout << "KEY FOR " << s->name() << ": '" << s->getKey() << "'"<< endl << endl;
+    			while(1){
+    				cout << "INPUT MESSAGE: ";
+    				cin >> m;
+    				if(m.compare(0,6,"NEWKEY")  == 0){ break;};
+    				if(m.compare(0,7,"NEWPROC") == 0){ newProc = true; break;};
+    				if(m.compare(0,8,"QUITQUIT") == 0){ quit    = true; break;};
+    				c  = s->encrypt(m);
+    				mm = s->decrypt(c);
+    				cout << "m : '" << m << "'\nc : '" << c << "'\nmm: '" << mm <<"'\n\n";
+    			};
+    			if(newProc || quit) break;
+    		};
+    		if(quit) break;
+    	};
+    }catch(string &msg){
         cout << msg << endl;
     }catch(...){
-        cout << "unknown error\n";
+        cout << "UNKNOWN ERROR\n";
     }
-    cout << endl << endl << endl;
-    return;
+    cout << endl << "BYE BYE!"<< endl << endl << endl;
+    return 0;
 }
 
-void demoCaesar(){
-    string c, m, mm;
-    unsigned int k;
-    try{
-        Caesar *s = new Caesar();
-        s->initAlphabet("abcdefghijklmnopqrstuvwxyz_");
-        cout << "Use the following alphabet:\n"<< s->getAlphabet() << endl << endl;
-
-        while(1){
-            cout << "input message: ";
-            cin >> m;
-            cout << "input key: ";
-            cin >> k;
-            s->setKey(k);
-            k = s->getKey();
-            c = s->encrypt(m);
-            mm = s->decrypt(c);
-            cout << "m : '" << m << "'\nk : '" << k << "'\nc : '" << c << "'\nmm: '" << mm <<"'\n";
-        }
-    }catch(string msg){
-        cout << msg << endl;
-    }catch(...){
-        cout << "unknown error\n";
-    }
-    cout << endl << endl << endl;
-    return;
-}
-
-void demoVigenere(){
-    string k, c, m, mm;
-    try{
-        Vigenere *s = new Vigenere();
-        s->initAlphabet("abcdefghijklmnopqrstuvwxyz_");
-        cout << "Use the following alphabet:\n"<< s->getAlphabet() << endl << endl;
-
-        while(1){
-            cout << "input message: ";
-            cin >> m;
-            cout << "input key: ";
-            cin >> k;
-            s->generateRandomKey(1,k.size());
-            s->setKey(k);
-            k = s->getKey();
-            c = s->encrypt(m);
-            mm = s->decrypt(c);
-            cout << "m : '" << m << "'\nk : '" << k << "'\nc : '" << c << "'\nmm: '" << mm <<"'\n";
-        }
-    }catch(string msg){
-        cout << msg << endl;
-    }catch(...){
-        cout << "unknown error\n";
-    }
-    cout << endl << endl << endl;
-    return;
-}

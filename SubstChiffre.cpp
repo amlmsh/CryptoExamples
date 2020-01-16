@@ -8,16 +8,51 @@ using namespace std;
 
 namespace CRYPTO{
 
-
-ICryptoSys *CryptoSystemFactory::getCryptoSystem(int ID){
-    return new Vigenere();
+ICryptoSystemFactory::~ICryptoSystemFactory(){
+	;
 }
 
+CryptoSystemFactory::~CryptoSystemFactory(){
+	;
+}
+
+ICryptoSys *CryptoSystemFactory::getCryptoSystem(int ID){
+	switch(ID){
+		case 0:  return new Vigenere();
+		case 1:  return new Caesar();
+		default: return new SubChiffre();
+	}
+}
+
+ICryptoSys *CryptoSystemFactory::getCryptoSystem(){
+	int r = rand() % 3;
+	return getCryptoSystem(r);
+}
+
+
+
+ICryptoSys::~ICryptoSys(){
+	;
+}
 
 CryptoSys::CryptoSys(){
     sizeAlphabet_ = 0;
     alphabet_ = NULL;
     initAlphabet(DEFAULT_ALPHABET);
+    name_ = string("undefined");
+}
+
+CryptoSys::~CryptoSys(){
+	if(alphabet_ != NULL){
+		delete alphabet_;
+		alphabet_ = NULL;
+	}
+	sizeAlphabet_= 0;
+}
+
+
+string CryptoSys::name(){
+    return (name_);
 }
 
 void   CryptoSys::initAlphabet(string a){
@@ -32,8 +67,10 @@ void   CryptoSys::initAlphabet(string a){
     }
 
     alphabet_= new char[sizeAlphabet_];
+
     for(unsigned int i=0; i <sizeAlphabet_; i++){
-        alphabet_[i] = toupper(a[i]);
+        alphabet_[i] = toupper((int)a[i]);
+        if(i == 0) continue;
         if(isDuplicate(alphabet_,i-1,alphabet_[i])){
             string msg = string("Alphabet contains duplicates of '") + alphabet_[i] + string("'.");
             delete alphabet_;
@@ -49,7 +86,7 @@ bool CryptoSys::isMsgValid(string msg){
     msgSize = msg.size();
 
     for(unsigned int i=0; i < msgSize; i++){
-        if(! isDuplicate(alphabet_,sizeAlphabet_-1,toupper(msg[i])) ) {
+        if(! isDuplicate(alphabet_,sizeAlphabet_-1,toupper((int)msg[i])) ) {
             return false;
         }
     }
@@ -57,9 +94,11 @@ bool CryptoSys::isMsgValid(string msg){
 }
 
 
-bool CryptoSys::isDuplicate(char *l, int maxIdx, char c){
+bool CryptoSys::isDuplicate(char *l, unsigned int maxIdx, char c){
     for(int i=0; i<=maxIdx;i++){
-        if(l[i] == c) return true;
+        if(l[i] == c){
+        	return true;
+        }
     }
     return false;
 }
@@ -75,12 +114,15 @@ string CryptoSys::getAlphabet(){
 
 string CryptoSys::encrypt(string m){
     if(!isMsgValid(m)){
-        throw string("Message contains char that doesn't belong to the defined alphabet.");
+        throw string("Message contains characters that doesn't belong to the defined alphabet.");
     }
     return myEncryptionProc(m);
 }
 
 string CryptoSys::decrypt(string c){
+    if(!isMsgValid(c)){
+        throw string("Message contains characters that doesn't belong to the defined alphabet.");
+    }
     return myDecryptionProc(c);
 }
 
@@ -90,13 +132,14 @@ Vigenere::Vigenere():Vigenere(1,5){
 
 Vigenere::Vigenere(unsigned int minKeySize, unsigned int maxKeySize) : CryptoSys(){
     if( (minKeySize < 1) || (maxKeySize < minKeySize)){
-        throw string("Vigenere : min / max key size worng.");
+        throw string("Vigenere : min / max key size wrong.");
     }
 
     initAlphabet(DEFAULT_ALPHABET);
     minKeySize_ = minKeySize;
     maxKeySize_ = maxKeySize;
     generateRandomKey();
+    name_ = string("Vigenere");
 }
 
 string Vigenere::myEncryptionProc(string m){
@@ -112,7 +155,7 @@ string Vigenere::myEncryptionProc(string m){
 
     // calculation results to letters
     for(unsigned int i=0; i<m.size(); i++){
-        c[i] = tolower(alphabet_[c[i] % sizeAlphabet_]);
+        c[i] = tolower((int) (alphabet_[c[i] % sizeAlphabet_]) );
     }
     return c;
 }
@@ -140,7 +183,7 @@ void   Vigenere::generateRandomKey(){
 
 void   Vigenere::generateRandomKey(unsigned int minKeySize, unsigned int maxKeySize){
     if( (minKeySize < 1) || (maxKeySize < minKeySize)){
-        throw string("Vigenere : min / max key size worng.");
+        throw string("Vigenere : min / max key size wrong.");
     };
     minKeySize_ = minKeySize;
     maxKeySize_ = maxKeySize;
@@ -189,12 +232,13 @@ unsigned int CryptoSys::M2C(char c){
 
 Caesar::Caesar() : CryptoSys(){
     generateRandomKey();
+    name_ = string("Caesar");
 }
 void Caesar::generateRandomKey(){
     key_ = (rand() % (sizeAlphabet_ - 1)) + 1;
 }
 
-unsigned int Caesar::getKey(){
+unsigned int Caesar::getCaesarKey(){
     return key_;
 }
 
@@ -203,6 +247,13 @@ void Caesar::setKey(unsigned int k){
         throw string("setKey the given key value is aout of range.");
     }
     key_ = k;
+}
+
+string Caesar::getKey(){
+	stringstream ss;
+	ss << "";
+	ss << getCaesarKey();
+	return ss.str();
 }
 
 string Caesar::myEncryptionProc(string m){
@@ -218,7 +269,7 @@ string Caesar::myEncryptionProc(string m){
 
     // calculation results to letters
     for(unsigned int i=0; i<m.size(); i++){
-        c[i] = tolower(alphabet_[c[i] % sizeAlphabet_]);
+        c[i] = tolower((int) alphabet_[c[i] % sizeAlphabet_]);
     }
     return c;
 }
@@ -246,6 +297,7 @@ string Caesar::myDecryptionProc(string c){
 SubChiffre::SubChiffre() : CryptoSys(){
     key_ = NULL;
     generateRandomKey();
+    name_ = string("Substitution");
 }
 
 void SubChiffre::generateRandomKey(){
@@ -300,9 +352,11 @@ unsigned int SubChiffre::C2M(char c){
 string  SubChiffre::getKey(){
     stringstream ss;
     for(unsigned int i=0; i< sizeAlphabet_; i++){
-        ss << "(" << alphabet_[i] << ", " << key_[i] << ")\n";
+        ss << "('" << alphabet_[i] << "' <--> '" << key_[i] << "') ";
     }
     return ss.str();
 }
+
+
 
 } // end namespace CRYPTO

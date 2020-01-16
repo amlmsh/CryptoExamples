@@ -1,4 +1,4 @@
-CC=g++
+CC=cc
 
 #CFLAGS=$(shell pkg-config --cflags opencv) 
 #LIBS=$(shell pkg-config --libs opencv) 
