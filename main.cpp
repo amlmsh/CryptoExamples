@@ -13,6 +13,13 @@ int main()
     ICryptoSys *s;
     string c, m, mm;
     bool newProc, quit;
+
+    cout << "USE THE FOLLOWING COMMAND AS INPUT MESSAGE ";
+    cout << "TO CHANGE ENCRYPTION, CHANGE KEY AND QUIT APPLICATION:\n";
+    cout << "   NEWPROC\n";
+    cout << "   NEWKEY\n";
+    cout << "   QUITQUIT\n\n\n";
+
     try{
     	while(1){
     		newProc = false;
@@ -34,7 +41,11 @@ int main()
     				mm = s->decrypt(c);
     				cout << "m : '" << m << "'\nc : '" << c << "'\nmm: '" << mm <<"'\n\n";
     			};
-    			if(newProc || quit) break;
+    			cout << "\n\n";
+    			if(newProc || quit){
+    				delete s;
+    				break;
+    			}
     		};
     		if(quit) break;
     	};
