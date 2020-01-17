@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <iostream>
 
+#include <fstream>
+
 using namespace std;
 
 namespace CRYPTO{
@@ -360,3 +362,63 @@ string  SubChiffre::getKey(){
 
 
 } // end namespace CRYPTO
+
+
+namespace DATASOURCE{
+
+DataSource::DataSource(){
+	dataFile_ = NULL;
+	return;
+};
+
+DataSource::~DataSource(){
+	if(dataFile_ != NULL){
+		dataFile_->close();
+		delete dataFile_;
+		dataFile_= NULL;
+	}
+	return;
+};
+
+void DataSource::init(string filename){
+	if(dataFile_ != NULL){
+		dataFile_->close();
+		delete dataFile_;
+		dataFile_= NULL;
+	}
+
+	try{
+		dataFile_= new ifstream(filename);
+		if(!dataFile_->is_open()){
+			delete dataFile_;
+			dataFile_ = NULL;
+			throw string("error");
+		}
+
+	}catch(...){
+		throw string ("Unable to open file: " + filename);
+	}
+	return;
+
+};
+
+void DataSource::setCryptoSystem(CRYPTO::ICryptoSys &s){
+	return;
+};
+
+string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
+	if(dataFile_ == NULL){
+		throw string("No data source available for reading plain text.");
+	}
+	return "";
+};
+
+string DataSource::getChiffreText(unsigned int idx, unsigned int blockSize){
+	if(dataFile_ == NULL){
+		throw string("No data source available for reading plain text.");
+	};
+	return "";
+};
+
+
+}; // end namespace DATASOURCE

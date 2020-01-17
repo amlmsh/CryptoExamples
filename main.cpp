@@ -6,9 +6,25 @@
 using namespace std;
 using namespace CRYPTO;
 
+void demoCrypSys();
+
 int main()
 {
     srand(time(NULL));
+
+    DATASOURCE::DataSource d;
+
+    try{
+    	d.init("plainAAAA_000.dat");
+    }catch(string &msg){
+    	cout << msg << endl;
+    }catch(...){
+    	cout << "unknown error\n";
+    }
+
+}
+
+void demoCrypSys(){
     CryptoSystemFactory f;
     ICryptoSys *s;
     string c, m, mm;
@@ -55,6 +71,5 @@ int main()
         cout << "UNKNOWN ERROR\n";
     }
     cout << endl << "BYE BYE!"<< endl << endl << endl;
-    return 0;
+    return;
 }
-

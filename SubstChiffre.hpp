@@ -15,6 +15,12 @@
 
 using namespace std;
 
+
+
+
+
+
+
 /**
  *
  * \namespace CRYPTO
@@ -459,6 +465,104 @@ public:
 
 } // end namespace CRYPTO
 
+
+/**
+ *
+ * \namespace DATASOURCE
+ *
+ * \brief Contains the implementation
+ * of text data sources
+ *
+ */
+namespace DATASOURCE{
+
+/**
+ *
+ * \class IDataSource
+ *
+ *	\brief Interface class for providing text data.
+ *
+ */
+class IDataSource{
+public:
+
+	/**
+	 *
+	 * \brief Initalization of a data source plain text.
+	 * The data are stored plain text in a data file.
+	 *
+	 *  An exception is thrown if data file can not be opened.
+	 *
+	 *  \param string filename of the data file
+	 *
+	 */
+	virtual void init(string filename)                  = 0;
+
+	/**
+	 *
+	 * \brief Sets an crypto system implementing interface
+	 * CRYPTO::ICryptoSys
+	 *
+	 * \param s  Reference to an object of an class implementing interface CRYPTO::ICryptoSys
+	 *
+	 */
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys &s) = 0;
+
+	/**
+	 *
+	 * \brief Returns plain text of blocksize text elements
+	 * staring at index idx. (text elements and idx are not
+	 * defined yet)
+	 *
+	 *	\param idx int index where the plain text to be returned starts
+	 *	\param blockSize int  number text elements to be returned
+	 *
+	 *	\return string plain text
+	 *
+	 */
+	virtual string getPlainText(unsigned int idx, unsigned int blockSize)   = 0;
+
+
+	/**
+	 *
+	 * \brief Returns the encrypted text of blocksize text elements
+	 * staring at index idx. (text elements and idx are not
+	 * defined yet)
+	 *
+	 *	\param idx int index where the plain text encrypted to be returned starts
+	 *	\param blockSize int  number text elements to be returned
+	 *
+	 *	\return string encrypted text
+	 *
+	 */
+	virtual string getChiffreText(int unsigned idx, unsigned int blockSize) = 0;
+};
+
+
+/**
+ *
+ * \class DataSource
+ *
+ *	\brief A class implementing the interface IDataSource
+ *
+ */
+class DataSource : public IDataSource{
+public:
+	DataSource();
+	~DataSource();
+	virtual void init(string filename);
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys &s);
+	virtual string getPlainText(unsigned int idx, unsigned int blockSize);
+	virtual string getChiffreText(unsigned int idx, unsigned int blockSize);
+
+protected:
+
+	ifstream *dataFile_;
+
+};
+
+
+} // end namespace DATASOURCE
 
 
 
