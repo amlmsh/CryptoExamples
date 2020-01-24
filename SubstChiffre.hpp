@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+
 using namespace std;
 
 
@@ -503,10 +504,10 @@ public:
 	 * \brief Sets an crypto system implementing interface
 	 * CRYPTO::ICryptoSys
 	 *
-	 * \param s  Reference to an object of an class implementing interface CRYPTO::ICryptoSys
+	 * \param *s  Reference to an object of an class implementing interface CRYPTO::ICryptoSys
 	 *
 	 */
-	virtual void   setCryptoSystem(CRYPTO::ICryptoSys &s) = 0;
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s) = 0;
 
 	/**
 	 *
@@ -551,13 +552,15 @@ public:
 	DataSource();
 	~DataSource();
 	virtual void init(string filename);
-	virtual void   setCryptoSystem(CRYPTO::ICryptoSys &s);
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s);
 	virtual string getPlainText(unsigned int idx, unsigned int blockSize);
 	virtual string getChiffreText(unsigned int idx, unsigned int blockSize);
 
 protected:
 
-	ifstream *dataFile_;
+	bool isCharPartOfAlphabet(char c, string alphabet);
+	string fileName_;
+	CRYPTO::ICryptoSys *cryptoSys_;
 
 };
 

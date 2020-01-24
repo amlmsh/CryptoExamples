@@ -3,7 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <iostream>
-
+#include <string>
 #include <fstream>
 
 using namespace std;
@@ -367,57 +367,78 @@ string  SubChiffre::getKey(){
 namespace DATASOURCE{
 
 DataSource::DataSource(){
-	dataFile_ = NULL;
+	fileName_ = string("");
+	cryptoSys_ = NULL;
 	return;
 };
 
 DataSource::~DataSource(){
-	if(dataFile_ != NULL){
-		dataFile_->close();
-		delete dataFile_;
-		dataFile_= NULL;
+	if(cryptoSys_ != NULL){
+		delete cryptoSys_;
+		cryptoSys_ = NULL;
 	}
 	return;
 };
 
 void DataSource::init(string filename){
-	if(dataFile_ != NULL){
-		dataFile_->close();
-		delete dataFile_;
-		dataFile_= NULL;
-	}
-
-	try{
-		dataFile_= new ifstream(filename);
-		if(!dataFile_->is_open()){
-			delete dataFile_;
-			dataFile_ = NULL;
-			throw string("error");
-		}
-
-	}catch(...){
-		throw string ("Unable to open file: " + filename);
-	}
-	return;
-
+	fileName_ = string(filename);
 };
 
-void DataSource::setCryptoSystem(CRYPTO::ICryptoSys &s){
+void DataSource::setCryptoSystem(CRYPTO::ICryptoSys *cSys){
+	cryptoSys_ = cSys;
 	return;
 };
 
 string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
-	if(dataFile_ == NULL){
-		throw string("No data source available for reading plain text.");
+	stringstream ss;
+	FILE *dataFile;
+	string resStr("");
+	int c, cPre, line;
+
+	if(cryptoSys_ == NULL){
+		throw string("error: no crypto system initialized.");
 	}
-	return "";
+
+	try{
+		dataFile = fopen(fileName_.c_str(),"r");
+		if(dataFile == NULL){
+			throw string("error: can not open file.");
+		}
+
+	}catch(...){
+		throw string ("Unable to open file: " + fileName_);
+	}
+
+	line = 0;
+	cPre = 'x';
+	while ((c = fgetc(dataFile)) != EOF){
+		if( ((char) c) == '\n' ){
+			line++;
+		}
+		if( (line >= idx) && (line <= (idx + blockSize) ) ){
+			if((char) c == ' '){
+				if(cPre != ' '){
+					ss << '_';
+				};
+				cPre = c;
+				continue;
+			}
+			if(isCharPartOfAlphabet((char) c, cryptoSys_->getAlphabet())){ // check if character belongs to the alphabet.
+				ss << (char) c;
+			}
+			cPre = c;
+		}
+	}
+	return ss.str();
 };
 
+bool DataSource::isCharPartOfAlphabet(char c, string alphabet){
+	return true;
+}
+
 string DataSource::getChiffreText(unsigned int idx, unsigned int blockSize){
-	if(dataFile_ == NULL){
-		throw string("No data source available for reading plain text.");
-	};
-	return "";
+
+	return getPlainText(idx,blockSize);
 };
 
 

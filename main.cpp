@@ -7,21 +7,63 @@ using namespace std;
 using namespace CRYPTO;
 
 void demoCrypSys();
+void demoVigenere();
+void demoText();
 
 int main()
 {
     srand(time(NULL));
+    try{
+    	demoText();
+    }catch(string &msg){
+    	cout << "error: " << msg << endl;
+    }catch(...){
+    	cout << "unknown error.\n";
+    }
 
+}
+
+void demoText(){
     DATASOURCE::DataSource d;
+    CRYPTO::ICryptoSys  *ptrS;
+    Vigenere  s;
+    ptrS =  (CRYPTO::ICryptoSys *) (&s);
 
     try{
     	d.init("plainAAAA_000.dat");
+    	d.setCryptoSystem(ptrS);
+    	cout << d.getPlainText(10,20) << endl;
     }catch(string &msg){
     	cout << msg << endl;
     }catch(...){
     	cout << "unknown error\n";
     }
+}
 
+
+void demoVigenere(){
+	Vigenere  s;
+	s.initAlphabet("abcdefghijklmnopqrstuvwxyz0123456789_");
+	string key, m, mm, c;
+
+	cout << "key:";
+	cin >> key;
+	s.generateRandomKey(1,(unsigned int)key.length());
+
+	s.setKey(key);
+
+
+	while(1){
+		cout << "m:";
+		cin >> m;
+
+		c  = s.encrypt(m);
+		mm = s.decrypt(c);
+		cout << "\n\nk :'" << key <<"'\n";
+		cout << "m :'" << m <<"'\n";
+		cout << "c :'" << c <<"'\n";
+		cout << "mm:'" << mm <<"'\n\n\n";
+	}
 }
 
 void demoCrypSys(){
