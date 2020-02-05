@@ -228,6 +228,7 @@ unsigned int CryptoSys::M2C(char c){
             return i;
         }
     }
+    cout << " char: '" << c << "' \n";
     throw string("M2C: given char does not belong to the current alphabet.");
 }
 
@@ -367,27 +368,32 @@ string  SubChiffre::getKey(){
 namespace DATASOURCE{
 
 DataSource::DataSource(){
-	fileName_ = string("");
-	cryptoSys_ = NULL;
+	dataSourceName_ = string("");
 	return;
 };
 
 DataSource::~DataSource(){
-	if(cryptoSys_ != NULL){
-		delete cryptoSys_;
-		cryptoSys_ = NULL;
-	}
 	return;
 };
 
 void DataSource::init(string filename){
-	fileName_ = string(filename);
+	dataSourceName_ = string(filename);
 };
 
-void DataSource::setCryptoSystem(CRYPTO::ICryptoSys *cSys){
-	cryptoSys_ = cSys;
+
+void DataSource::setAlphabet(string alphabet){
+	string dupl = duplicatesOfAlphabet(alphabet);
+	if(dupl.length() != 0){
+		throw string("given alphabet contains the following duplicates: '" + dupl + "'." );
+	}
+	alphabet_ = string(alphabet);
 	return;
-};
+}
+
+string DataSource::getAlphabet(){
+	return alphabet_;
+}
+
 
 string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
 	stringstream ss;
@@ -395,18 +401,14 @@ string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
 	string resStr("");
 	int c, cPre, line;
 
-	if(cryptoSys_ == NULL){
-		throw string("error: no crypto system initialized.");
-	}
-
 	try{
-		dataFile = fopen(fileName_.c_str(),"r");
+		dataFile = fopen(dataSourceName_.c_str(),"r");
 		if(dataFile == NULL){
 			throw string("error: can not open file.");
 		}
 
 	}catch(...){
-		throw string ("Unable to open file: " + fileName_);
+		throw string ("Unable to open file: " + dataSourceName_);
 	}
 
 	line = 0;
@@ -423,7 +425,7 @@ string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
 				cPre = c;
 				continue;
 			}
-			if(isCharPartOfAlphabet((char) c, cryptoSys_->getAlphabet())){ // check if character belongs to the alphabet.
+			if(isCharPartOfAlphabet((char) c, alphabet_) ){ // check if character belongs to the alphabet.
 				ss << (char) c;
 			}
 			cPre = c;
@@ -432,14 +434,44 @@ string DataSource::getPlainText(unsigned int idx, unsigned int blockSize){
 	return ss.str();
 };
 
-bool DataSource::isCharPartOfAlphabet(char c, string alphabet){
-	return true;
+string DataSource::duplicatesOfAlphabet(string alphabet){
+	stringstream ss;
+	string duplicates("");
+	char c;
+
+	for(int i=0; i< alphabet.length(); i++){
+		c = alphabet[i];
+		if(isCharPartOfAlphabet(c,alphabet) ){
+			ss << c;
+		}
+	}
+	return ss.str();
 }
 
-string DataSource::getChiffreText(unsigned int idx, unsigned int blockSize){
+bool DataSource::isCharPartOfAlphabet(char c, string alphabet){
+	for(int i=0; i< alphabet.length(); i++){
+		if(c == alphabet[i]){
+			return true;
+		}
+	}
+	return false;
+}
 
-	return getPlainText(idx,blockSize);
+EnDeCryptedDataSource::EnDeCryptedDataSource(){
+	cryptoSys_ = NULL;
+}
+
+EnDeCryptedDataSource::~EnDeCryptedDataSource(){
+}
+
+string EnDeCryptedDataSource::getChiffreText(unsigned int idx, unsigned int blockSize){
+	return string("");
 };
 
+
+void EnDeCryptedDataSource::setCryptoSystem(CRYPTO::ICryptoSys *cSys){
+	cryptoSys_ = cSys;
+	return;
+};
 
 }; // end namespace DATASOURCE

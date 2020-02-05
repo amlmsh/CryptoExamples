@@ -14,7 +14,7 @@ int main()
 {
     srand(time(NULL));
     try{
-    	demoText();
+
     }catch(string &msg){
     	cout << "error: " << msg << endl;
     }catch(...){
@@ -24,15 +24,18 @@ int main()
 }
 
 void demoText(){
-    DATASOURCE::DataSource d;
+    DATASOURCE::EnDeCryptedDataSource e;
     CRYPTO::ICryptoSys  *ptrS;
     Vigenere  s;
     ptrS =  (CRYPTO::ICryptoSys *) (&s);
 
+
     try{
-    	d.init("plainAAAA_000.dat");
-    	d.setCryptoSystem(ptrS);
-    	cout << d.getPlainText(10,20) << endl;
+    	e.setAlphabet("abcd");
+
+    	//e.setCryptoSystem(ptrS);
+    	//e.init("plainAAAA_000.dat");
+    	//cout << e.getPlainText(10,20) << endl;
     }catch(string &msg){
     	cout << msg << endl;
     }catch(...){

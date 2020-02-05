@@ -477,6 +477,7 @@ public:
  */
 namespace DATASOURCE{
 
+
 /**
  *
  * \class IDataSource
@@ -489,25 +490,34 @@ public:
 
 	/**
 	 *
-	 * \brief Initalization of a data source plain text.
+	 * \brief Initalization of a data source for plain text.
 	 * The data are stored plain text in a data file.
 	 *
 	 *  An exception is thrown if data file can not be opened.
 	 *
-	 *  \param string filename of the data file
+	 *  \param string dataSourceName of the plain text data
 	 *
 	 */
-	virtual void init(string filename)                  = 0;
+	virtual void init(string dataSourceName)                  = 0;
 
 	/**
 	 *
-	 * \brief Sets an crypto system implementing interface
-	 * CRYPTO::ICryptoSys
+	 * \brief Returns the alphabet (all characters used in the text)
+	 * of the currently used.
 	 *
-	 * \param *s  Reference to an object of an class implementing interface CRYPTO::ICryptoSys
+	 * \return string containing all characters of the alphabet used (case sensitive)
 	 *
 	 */
-	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s) = 0;
+	virtual string getAlphabet() = 0;
+
+	/**
+	 *
+	 * \brief The given string defines the alphabet (case sensitive) used.
+	 *
+	 * \param string alphabet case sensitive definition of the alphabet
+	 *
+	 */
+	virtual void setAlphabet(string alphabet) = 0;
 
 	/**
 	 *
@@ -522,6 +532,33 @@ public:
 	 *
 	 */
 	virtual string getPlainText(unsigned int idx, unsigned int blockSize)   = 0;
+
+
+};
+
+
+
+
+
+/**
+ *
+ * \class IEnDeCryptedDataSource
+ *
+ *	\brief Interface class for providing text data.
+ *
+ */
+class IEnDeCryptedDataSource{
+public:
+
+	/**
+	 *
+	 * \brief Sets an crypto system implementing interface
+	 * CRYPTO::ICryptoSys
+	 *
+	 * \param *s  Reference to an object of an class implementing interface CRYPTO::ICryptoSys
+	 *
+	 */
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s) = 0;
 
 
 	/**
@@ -551,17 +588,38 @@ class DataSource : public IDataSource{
 public:
 	DataSource();
 	~DataSource();
-	virtual void init(string filename);
-	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s);
+	virtual void init(string dataSourceName);
+	virtual void   setAlphabet(string alphabet);
+	virtual string getAlphabet();
 	virtual string getPlainText(unsigned int idx, unsigned int blockSize);
+
+protected:
+
+	string duplicatesOfAlphabet(string alphabet);
+	bool isCharPartOfAlphabet(char c, string alphabet);
+	string dataSourceName_;
+	string alphabet_;
+
+};
+
+
+/**
+ *
+ * \class DataSource
+ *
+ *	\brief A class implementing the interface IDataSource
+ *
+ */
+class EnDeCryptedDataSource : public DataSource, public IEnDeCryptedDataSource{
+public:
+	EnDeCryptedDataSource();
+	~EnDeCryptedDataSource();
+	virtual void   setCryptoSystem(CRYPTO::ICryptoSys *s);
 	virtual string getChiffreText(unsigned int idx, unsigned int blockSize);
 
 protected:
 
-	bool isCharPartOfAlphabet(char c, string alphabet);
-	string fileName_;
 	CRYPTO::ICryptoSys *cryptoSys_;
-
 };
 
 
